@@ -23,7 +23,7 @@ function formatBalance(value: number): string {
 }
 
 async function fetchJson(url: string, init?: RequestInit): Promise<any> {
-  const response = await fetch(url, { ...init, signal: AbortSignal.timeout(15000) });
+  const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10000) });
   if (!response.ok) throw new Error("HTTP " + response.status);
   return await response.json();
 }
@@ -103,7 +103,7 @@ Deno.serve(async (req: Request) => {
       let failed = 0;
       const errors: string[] = [];
 
-      await mapLimit(wallets, 12, async (wallet) => {
+      await mapLimit(wallets, 16, async (wallet) => {
         try {
           const balance = await getBalance(wallet);
           const update = await db.from("wallets")
