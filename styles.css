@@ -71,3 +71,4 @@ header{max-width:none;padding:0 26px}
 .wallet-table .mini.danger{color:#ff9ba5;border-color:#ff879533}
 .wallet-table tbody tr:hover{background:#ffffff07}
 @media(max-width:650px){.wallet-table{min-width:760px}.wallet-table th,.wallet-table td{padding:12px 10px}}
+\n/* Four network summary metrics */\n.network-stats{grid-template-columns:repeat(4,minmax(0,1fr))}\n@media(max-width:900px){.network-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}\n@media(max-width:650px){.network-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.network-stats article:last-child{grid-column:auto}}\n
