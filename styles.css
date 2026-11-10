@@ -49,3 +49,25 @@ header{max-width:none;padding:0 26px}
 /* Show the bulk-add form only on the dedicated Tambah Wallet page */
 .workspace:not(.add-mode)>.add-panel{display:none!important}
 .workspace.add-mode>.add-panel{display:block!important}
+
+
+/* Clear five-column wallet table layout */
+.wallet-table-wrap{width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.wallet-table{min-width:790px;table-layout:fixed}
+.wallet-table th,.wallet-table td{padding:15px 13px}
+.wallet-table th:nth-child(1){width:40%;text-align:left}
+.wallet-table th:nth-child(2){width:19%;text-align:left}
+.wallet-table th:nth-child(3){width:17%;text-align:right}
+.wallet-table th:nth-child(4),.wallet-table th:nth-child(5){width:12%;text-align:center}
+.wallet-table td:nth-child(2){text-align:left}
+.wallet-table td.table-balance{text-align:right;white-space:normal}
+.wallet-table td.table-control{text-align:center;vertical-align:middle}
+.wallet-table .table-address{font-size:10px;line-height:1.55;overflow-wrap:anywhere;word-break:break-word}
+.wallet-table .table-number{font:700 11px "DM Mono";color:var(--cyan);margin-bottom:6px}
+.wallet-table .table-balance strong{display:block;font-size:14px;overflow-wrap:anywhere}
+.wallet-table .table-balance>span{display:block;margin:4px 0 0;font-size:10px}
+.wallet-table .table-meta{line-height:1.55;overflow-wrap:anywhere}
+.wallet-table .mini{margin:0;min-width:88px;white-space:nowrap}
+.wallet-table .mini.danger{color:#ff9ba5;border-color:#ff879533}
+.wallet-table tbody tr:hover{background:#ffffff07}
+@media(max-width:650px){.wallet-table{min-width:760px}.wallet-table th,.wallet-table td{padding:12px 10px}}
