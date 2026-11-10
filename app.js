@@ -34,3 +34,127 @@ if($("consolidation-list"))$("consolidation-list").addEventListener("click",asyn
  if(copy){try{await navigator.clipboard.writeText(copy.dataset.copyAmount);consolidationSay("Nominal ETH berhasil disalin. Pastikan wallet menampilkan alamat tujuan yang benar sebelum mengirim.")}catch{consolidationSay("Tidak dapat menyalin nominal otomatis.",true)}}
 });
 if($("copy-consolidation-destination"))$("copy-consolidation-destination").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(MAIN_ETH_ADDRESS);consolidationSay("Alamat wallet utama berhasil disalin.")}catch{consolidationSay("Tidak dapat menyalin otomatis. Salin alamat yang ditampilkan.",true)}});
+
+
+// Local MetaMask signer: private keys never enter this page or Supabase.
+// The active MetaMask account must match each source wallet and each transfer
+// is submitted only after the user confirms it in MetaMask.
+const ethSourceSigners = new Map();
+const ethTransferQuotes = new Map();
+
+function renderConsolidationWallets(){
+ const root=$("consolidation-list");if(!root)return;
+ const sources=wallets.filter(w=>w.chain==="ethereum").sort((a,b)=>{
+  const av=balanceNum(a),bv=balanceNum(b);
+  if(Number.isNaN(av))return Number.isNaN(bv)?0:1;
+  if(Number.isNaN(bv))return -1;
+  return bv-av;
+ });
+ if(!user){root.innerHTML='<div class="empty">Masuk untuk melihat daftar wallet Ethereum Anda.</div>';return}
+ if(!sources.length){root.innerHTML='<div class="empty">Belum ada wallet sumber Ethereum.</div>';return}
+ root.innerHTML='<div class="consolidation-summary"><strong>'+sources.length.toLocaleString("id-ID")+'</strong><span>wallet sumber · diurutkan dari saldo tersimpan terbesar</span></div><div class="consolidation-table-wrap"><table class="consolidation-table"><thead><tr><th>Wallet sumber</th><th>Saldo tersimpan</th><th>Perhitungan & pengiriman</th></tr></thead><tbody>'+sources.map(w=>{
+  const connected=ethSourceSigners.has(String(w.id));
+  return '<tr><td><code>'+esc(w.address)+'</code><small>'+esc(w.label||"Wallet")+'</small></td><td>'+esc(w.balance_text||"Belum diperiksa")+' ETH</td><td><button type="button" class="mini" data-eth-plan="'+esc(w.id)+'">Hitung saldo & gas</button><button type="button" class="mini" data-eth-connect="'+esc(w.id)+'">'+(connected?'Hubungkan ulang':'Hubungkan MetaMask')+'</button><div class="quote-result" id="eth-plan-'+esc(w.id)+'"></div></td></tr>';
+ }).join("")+'</tbody></table></div>';
+}
+
+async function getEthFeeQuote(provider){
+ const feeData=await provider.getFeeData();
+ if(feeData.maxFeePerGas){
+  const priority=feeData.maxPriorityFeePerGas??feeData.maxFeePerGas;
+  return {type:"eip1559",maxFeePerGas:feeData.maxFeePerGas,maxPriorityFeePerGas:priority,reserve:21000n*feeData.maxFeePerGas};
+ }
+ if(feeData.gasPrice)return {type:"legacy",gasPrice:feeData.gasPrice,reserve:21000n*feeData.gasPrice};
+ throw new Error("Estimasi gas Ethereum tidak tersedia. Coba lagi beberapa saat.");
+}
+
+async function planEthConsolidation(walletId){
+ const w=wallets.find(x=>String(x.id)===String(walletId)&&x.chain==="ethereum");if(!w)return;
+ try{
+  if(!window.ethers)throw new Error("Library Ethereum belum termuat. Muat ulang halaman.");
+  const provider=new ethers.JsonRpcProvider(CHAINS.ethereum.rpc);
+  const [balance,fee]=await Promise.all([provider.getBalance(w.address),getEthFeeQuote(provider)]);
+  const sendValue=balance>fee.reserve?balance-fee.reserve:0n;
+  const quote={balance,fee,sendValue,createdAt:Date.now()};
+  ethTransferQuotes.set(String(walletId),quote);
+  const signerConnected=ethSourceSigners.has(String(walletId));
+  const el=$("eth-plan-"+walletId);
+  const send=ethers.formatEther(sendValue);
+  if(el)el.innerHTML='<div class="quote-box"><span>Saldo live: <b>'+ethers.formatEther(balance)+' ETH</b></span><span>Cadangan gas maksimum (21.000 gas): <b>'+ethers.formatEther(fee.reserve)+' ETH</b></span><span>Perkiraan nominal kirim: <b>'+send+' ETH</b></span><span class="quote-caution">Nominal dihitung ulang tepat sebelum transaksi.</span>'+(sendValue>0n?(signerConnected?'<button type="button" class="mini send-eth-button" data-eth-send="'+esc(walletId)+'">Kirim melalui MetaMask</button>':'<span>Hubungkan akun sumber di MetaMask untuk mengaktifkan pengiriman.</span>'):'<b>Saldo tidak cukup untuk biaya gas.</b>')+'</div>';
+  consolidationSay(sendValue>0n?"Perhitungan selesai. Hubungkan MetaMask dengan akun sumber yang sesuai. Pengiriman hanya berlangsung setelah Anda menyetujui transaksi di MetaMask.":"Saldo tidak mencukupi untuk menutup cadangan biaya gas.",sendValue===0n);
+ }catch(e){consolidationSay("Gagal menghitung: "+(e?.shortMessage||e?.message||String(e)),true)}
+}
+
+async function connectEthSource(walletId){
+ const w=wallets.find(x=>String(x.id)===String(walletId)&&x.chain==="ethereum");if(!w)return;
+ try{
+  if(!window.ethereum)throw new Error("MetaMask atau wallet browser EVM belum terpasang.");
+  await window.ethereum.request({method:"eth_requestAccounts"});
+  let chainId=await window.ethereum.request({method:"eth_chainId"});
+  if(chainId!=="0x1"){
+   await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:"0x1"}]});
+   chainId=await window.ethereum.request({method:"eth_chainId"});
+  }
+  if(chainId!=="0x1")throw new Error("Pilih Ethereum Mainnet di MetaMask.");
+  const provider=new ethers.BrowserProvider(window.ethereum);
+  const signer=await provider.getSigner();
+  const account=(await signer.getAddress()).toLowerCase();
+  if(account!==w.address.toLowerCase())throw new Error("Akun MetaMask aktif tidak cocok dengan alamat sumber ini. Ganti akun di MetaMask, lalu hubungkan ulang.");
+  ethSourceSigners.set(String(walletId),{provider,signer,account});
+  await planEthConsolidation(walletId);
+  consolidationSay("Wallet sumber berhasil dihubungkan. Periksa kembali alamat tujuan dan nominal sebelum menyetujui transaksi.");
+ }catch(e){consolidationSay("Gagal menghubungkan wallet: "+(e?.shortMessage||e?.message||String(e)),true)}
+}
+
+async function sendEthFromSource(walletId){
+ const w=wallets.find(x=>String(x.id)===String(walletId)&&x.chain==="ethereum");
+ const connection=ethSourceSigners.get(String(walletId));
+ if(!w||!connection)return;
+ const button=document.querySelector('[data-eth-send="'+CSS.escape(String(walletId))+'"]');
+ if(button)button.disabled=true;
+ try{
+  if((await connection.signer.getAddress()).toLowerCase()!==w.address.toLowerCase())throw new Error("Akun aktif berubah. Hubungkan ulang wallet sumber.");
+  const network=await connection.provider.getNetwork();
+  if(network.chainId!==1n)throw new Error("Wallet tidak lagi berada di Ethereum Mainnet.");
+  const [balance,fee]=await Promise.all([connection.provider.getBalance(w.address),getEthFeeQuote(connection.provider)]);
+  const value=balance>fee.reserve?balance-fee.reserve:0n;
+  if(value<=0n)throw new Error("Saldo tidak cukup setelah cadangan gas.");
+  const tx={to:MAIN_ETH_ADDRESS,value,gasLimit:21000n};
+  if(fee.type==="eip1559"){
+   tx.maxFeePerGas=fee.maxFeePerGas;
+   tx.maxPriorityFeePerGas=fee.maxPriorityFeePerGas;
+  }else tx.gasPrice=fee.gasPrice;
+  const amount=ethers.formatEther(value);
+  const approved=window.confirm("Kirim "+amount+" ETH dari\n"+w.address+"\nke wallet utama?\n\nTransaksi akan dibuka di MetaMask untuk Anda periksa dan setujui.");
+  if(!approved){if(button)button.disabled=false;return}
+  consolidationSay("Menunggu persetujuan transaksi di MetaMask…");
+  const response=await connection.signer.sendTransaction(tx);
+  const explorer="https://etherscan.io/tx/"+response.hash;
+  const el=$("eth-plan-"+walletId);
+  if(el)el.innerHTML='<div class="quote-box"><b>Transaksi dikirim ke jaringan</b><span>Nominal: '+amount+' ETH</span><span>TX: <a target="_blank" rel="noopener noreferrer" href="'+explorer+'">'+response.hash+'</a></span><span>Menunggu konfirmasi blockchain…</span></div>';
+  consolidationSay("Transaksi sudah dikirim. Menunggu konfirmasi blockchain…");
+  const receipt=await response.wait(1);
+  if(receipt&&receipt.status===1){
+   if(el)el.innerHTML='<div class="quote-box"><b>Berhasil dikonfirmasi</b><span>Nominal: '+amount+' ETH</span><span>TX: <a target="_blank" rel="noopener noreferrer" href="'+explorer+'">'+response.hash+'</a></span><span>Blok: '+receipt.blockNumber+'</span></div>';
+   consolidationSay("Transaksi berhasil dikonfirmasi. Perbarui saldo untuk melihat saldo terbaru.");
+   await check(w);
+  }else{
+   consolidationSay("Transaksi tidak berhasil. Periksa detailnya di Etherscan.",true);
+  }
+ }catch(e){
+  if(button)button.disabled=false;
+  const message=e?.code===4001?"Transaksi dibatalkan di MetaMask.":(e?.shortMessage||e?.reason||e?.message||String(e));
+  consolidationSay("Pengiriman gagal: "+message,true);
+ }
+}
+
+if($("consolidation-list"))$("consolidation-list").addEventListener("click",async e=>{
+ const connect=e.target.closest("[data-eth-connect]");
+ const send=e.target.closest("[data-eth-send]");
+ if(connect){connect.disabled=true;await connectEthSource(connect.dataset.ethConnect);connect.disabled=false}
+ if(send)await sendEthFromSource(send.dataset.ethSend);
+});
+if(window.ethereum){
+ window.ethereum.on?.("accountsChanged",()=>{ethSourceSigners.clear();renderConsolidationWallets();consolidationSay("Akun MetaMask berubah. Hubungkan ulang setiap wallet sumber sebelum mengirim.")});
+ window.ethereum.on?.("chainChanged",()=>{ethSourceSigners.clear();renderConsolidationWallets();consolidationSay("Jaringan MetaMask berubah. Pilih Ethereum Mainnet dan hubungkan ulang wallet sumber.",true)});
+}
