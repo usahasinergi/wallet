@@ -138,6 +138,8 @@ async function sendEthFromSource(walletId){
    if(el)el.innerHTML='<div class="quote-box"><b>Berhasil dikonfirmasi</b><span>Nominal: '+amount+' ETH</span><span>TX: <a target="_blank" rel="noopener noreferrer" href="'+explorer+'">'+response.hash+'</a></span><span>Blok: '+receipt.blockNumber+'</span></div>';
    consolidationSay("Transaksi berhasil dikonfirmasi. Perbarui saldo untuk melihat saldo terbaru.");
    await check(w);
+   const confirmedEl=$("eth-plan-"+walletId);
+   if(confirmedEl)confirmedEl.innerHTML='<div class="quote-box"><b>Berhasil dikonfirmasi</b><span>Nominal: '+amount+' ETH</span><span>TX: <a target="_blank" rel="noopener noreferrer" href="'+explorer+'">'+response.hash+'</a></span><span>Blok: '+receipt.blockNumber+'</span></div>';
   }else{
    consolidationSay("Transaksi tidak berhasil. Periksa detailnya di Etherscan.",true);
   }
