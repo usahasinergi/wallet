@@ -45,3 +45,7 @@ header{max-width:none;padding:0 26px}
 
 /* Add Wallet is a dedicated sidebar page; hide network dashboard there */
 .workspace.add-mode>.page-heading,.workspace.add-mode>.network-stats,.workspace.add-mode>.wallet-section,.workspace.add-mode>.history,.workspace.add-mode>footer{display:none!important}.workspace.add-mode>.add-panel{display:block!important;max-width:900px;margin:12px auto 30px}.add-wallet-nav:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+/* Show the bulk-add form only on the dedicated Tambah Wallet page */
+.workspace:not(.add-mode)>.add-panel{display:none!important}
+.workspace.add-mode>.add-panel{display:block!important}
