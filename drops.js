@@ -8,9 +8,9 @@
   };
   const writeChecked = (set) => localStorage.setItem(stateKey(), JSON.stringify([...set]));
   const uniqueWallets = () => {
-    if (!Array.isArray(window.walletScopeWallets)) return [];
+    if (!Array.isArray(wallets)) return [];
     const seen = new Set();
-    return window.walletScopeWallets.filter(w => {
+    return wallets.filter(w => {
       const key = String(w.address || "").trim().toLowerCase();
       if (!key || seen.has(key)) return false;
       seen.add(key);
@@ -42,8 +42,8 @@
     const byChain = {};
     rows.forEach(w => (byChain[w.chain] ||= []).push(w));
     root.innerHTML = Object.entries(byChain).map(([chain, items]) => {
-      const chainName = window.walletScopeChains?.[chain]?.name || chain;
-      return '<section class="drops-chain"><div class="drops-chain-head"><strong>' + window.walletScopeEscape(chainName) + '</strong><button type="button" class="mini" data-drops-copy-chain="' + window.walletScopeEscape(chain) + '">Salin jaringan (' + items.length + ')</button></div>' +
+      const chainName = CHAINS?.[chain]?.name || chain;
+      return '<section class="drops-chain"><div class="drops-chain-head"><strong>' + esc(chainName) + '</strong><button type="button" class="mini" data-drops-copy-chain="' + window.walletScopeEscape(chain) + '">Salin jaringan (' + items.length + ')</button></div>' +
         items.map(w => {
           const id = String(w.id);
           const done = checked.has(id);
