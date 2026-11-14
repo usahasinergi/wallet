@@ -24,3 +24,15 @@
 .sidebar>.drops-nav{display:none!important}
 #network-menu>.drops-nav{display:flex!important;color:#aebbd0}
 #network-menu>.drops-nav:hover{background:#ffffff08;color:#fff}
+
+.drops-chain-head>div{display:flex;flex-direction:column;gap:5px}
+.drops-support{font-size:9px;color:#a7b2c6;font-weight:400}
+.drops-support.is-supported{color:#55e6d0}
+.drops-support.is-unlisted{color:#d8bd8a}
+.drops-search-label{display:block;margin:14px 0 6px;color:#a7b2c6;font-size:11px}
+.drops-search{width:100%;padding:11px 12px;border:1px solid #2b3951;border-radius:9px;background:#0b1220;color:var(--text);outline:none}
+.drops-search:focus{border-color:#55e6d0}
+.drops-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:650px){.drops-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.drops-metrics strong{font-size:19px}}
+
+.drops-check-link{display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
