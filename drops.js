@@ -70,7 +70,7 @@
       if (!btn) return;
       const chain = btn.dataset.dropsCopyChain;
       const rows = uniqueWallets().filter(w => w.chain === chain);
-      copy(rows.map(w => w.address).join("\n"), rows.length + " alamat " + (window.walletScopeChains?.[chain]?.name || chain) + " disalin.");
+      copy(rows.map(w => w.address).join("\n"), rows.length + " alamat " + (CHAINS[chain]?.name || chain) + " disalin.");
     });
     $d("drops-wallet-list")?.addEventListener("change", e => {
       const input = e.target.closest("[data-drops-checked]");
