@@ -19,3 +19,8 @@
 #drops-addresses{width:100%;min-height:150px;background:#0b1220;color:var(--text);border:1px solid #2b3951;border-radius:10px;padding:12px;font:11px/1.7 "DM Mono"}
 .drops-note{padding:12px;border:1px solid #d8a34a44;background:#d8a34a0c;border-radius:10px;color:#d8bd8a;font-size:10px;line-height:1.7}
 @media(max-width:650px){.drops-wallet-row{align-items:flex-start;flex-direction:column}.drops-chain-head{align-items:flex-start}.drops-actions>*{flex:1}.drops-metrics{gap:8px}}
+
+/* The live Drops.bot navigation is generated inside #network-menu. Hide legacy standalone button. */
+.sidebar>.drops-nav{display:none!important}
+#network-menu>.drops-nav{display:flex!important;color:#aebbd0}
+#network-menu>.drops-nav:hover{background:#ffffff08;color:#fff}
