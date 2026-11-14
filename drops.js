@@ -42,12 +42,12 @@
     const byChain = {};
     rows.forEach(w => (byChain[w.chain] ||= []).push(w));
     root.innerHTML = Object.entries(byChain).map(([chain, items]) => {
-      const chainName = CHAINS?.[chain]?.name || chain;
-      return '<section class="drops-chain"><div class="drops-chain-head"><strong>' + esc(chainName) + '</strong><button type="button" class="mini" data-drops-copy-chain="' + window.walletScopeEscape(chain) + '">Salin jaringan (' + items.length + ')</button></div>' +
+      const chainName = CHAINS[chain]?.name || chain;
+      return '<section class="drops-chain"><div class="drops-chain-head"><strong>' + esc(chainName) + '</strong><button type="button" class="mini" data-drops-copy-chain="' + esc(chain) + '">Salin jaringan (' + items.length + ')</button></div>' +
         items.map(w => {
           const id = String(w.id);
           const done = checked.has(id);
-          return '<div class="drops-wallet-row"><code>' + window.walletScopeEscape(w.address) + '</code><label><input type="checkbox" data-drops-checked="' + window.walletScopeEscape(id) + '"' + (done ? ' checked' : '') + '> Sudah diperiksa</label></div>';
+          return '<div class="drops-wallet-row"><code>' + esc(w.address) + '</code><label><input type="checkbox" data-drops-checked="' + esc(id) + '"' + (done ? ' checked' : '') + '> Sudah diperiksa</label></div>';
         }).join("") + '</section>';
     }).join("");
   };
@@ -57,7 +57,7 @@
     render();
   };
   document.addEventListener("DOMContentLoaded", () => {
-    $d("drops-nav")?.addEventListener("click", openPage);
+    $d("network-menu")?.addEventListener("click", e => { if (e.target.closest("[data-drops-open]")) openPage(); });
     $d("network-menu")?.addEventListener("click", () => document.querySelector(".workspace")?.classList.remove("drops-mode"));
     $d("add-wallet-nav")?.addEventListener("click", () => document.querySelector(".workspace")?.classList.remove("drops-mode"));
     $d("drops-copy-all")?.addEventListener("click", () => {
