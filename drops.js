@@ -19,6 +19,8 @@
     });
   };
   const supported = new Set(["ethereum", "arbitrum", "base", "solana", "bitcoin"]);
+  const addressKey = (w) => String(w.address || "").trim().toLowerCase();
+  const uniqueAddresses = (rows) => [...new Map(rows.map(w => [addressKey(w), w])).values()];
   const copy = async (value, message) => {
     if (!value) { $d("drops-message").textContent = "Tidak ada alamat untuk disalin."; return; }
     try {
@@ -35,9 +37,10 @@
     if (!root) return;
     const rows = uniqueWallets();
     const checked = readChecked();
-    const done = rows.filter(w => checked.has(String(w.id))).length;
-    const pending = rows.length - done;
-    const uniqueAddressCount = new Set(rows.map(w => String(w.address || "").trim().toLowerCase()).filter(Boolean)).size;
+    const addressRows = uniqueAddresses(rows);
+    const done = addressRows.filter(w => checked.has(addressKey(w)) || checked.has(String(w.id))).length;
+    const pending = addressRows.length - done;
+    const uniqueAddressCount = addressRows.length;
     $d("drops-total").textContent = uniqueAddressCount.toLocaleString("id-ID");
     $d("drops-checked").textContent = done.toLocaleString("id-ID");
     $d("drops-pending").textContent = pending.toLocaleString("id-ID");
@@ -63,7 +66,7 @@
       return '<section class="drops-chain"><div class="drops-chain-head"><div><strong>' + esc(chainName) + '</strong><small class="drops-support ' + (isSupported ? 'is-supported' : 'is-unlisted') + '">' + (isSupported ? 'Tercantum didukung Drops' : 'Belum tercantum di daftar dukungan Drops') + '</small></div><button type="button" class="mini" data-drops-copy-chain="' + esc(chain) + '">Salin (' + items.length + ')</button></div>' +
         items.map(w => {
           const id = String(w.id);
-          const done = checked.has(id);
+          const done = checked.has(addressKey(w)) || checked.has(id);
           return '<div class="drops-wallet-row"><code>' + esc(w.address) + '</code><label><input type="checkbox" data-drops-checked="' + esc(id) + '"' + (done ? ' checked' : '') + '> Sudah diperiksa</label></div>';
         }).join("") + '</section>';
     }).join("");
@@ -101,8 +104,10 @@
       const input = e.target.closest("[data-drops-checked]");
       if (!input) return;
       const checked = readChecked();
-      if (input.checked) checked.add(input.dataset.dropsChecked);
-      else checked.delete(input.dataset.dropsChecked);
+      const wallet = uniqueWallets().find(w => String(w.id) === input.dataset.dropsChecked);
+      const key = wallet ? addressKey(wallet) : input.dataset.dropsChecked;
+      if (input.checked) checked.add(key);
+      else checked.delete(key);
       writeChecked(checked);
       render();
     });
