@@ -58,6 +58,8 @@
   };
   document.addEventListener("DOMContentLoaded", () => {
     $d("drops-nav")?.addEventListener("click", openPage);
+    $d("network-menu")?.addEventListener("click", () => document.querySelector(".workspace")?.classList.remove("drops-mode"));
+    $d("add-wallet-nav")?.addEventListener("click", () => document.querySelector(".workspace")?.classList.remove("drops-mode"));
     $d("drops-copy-all")?.addEventListener("click", () => {
       const rows = uniqueWallets();
       copy(rows.map(w => w.address).join("\n"), rows.length + " alamat unik berhasil disalin.");
