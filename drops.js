@@ -67,7 +67,7 @@
         items.map(w => {
           const id = String(w.id);
           const done = checked.has(addressKey(w)) || checked.has(id);
-          return '<div class="drops-wallet-row"><code>' + esc(w.address) + '</code><label><input type="checkbox" data-drops-checked="' + esc(id) + '"' + (done ? ' checked' : '') + '> Sudah diperiksa</label></div>';
+          return '<div class="drops-wallet-row"><code>' + esc(w.address) + '</code><a class="mini drops-check-link" href="https://www.drops.bot/address/' + encodeURIComponent(w.address) + '" target="_blank" rel="noopener noreferrer">Cek di Drops ↗</a><label><input type="checkbox" data-drops-checked="' + esc(id) + '"' + (done ? ' checked' : '') + '> Sudah diperiksa</label></div>';
         }).join("") + '</section>';
     }).join("");
   };
