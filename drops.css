@@ -1,0 +1,21 @@
+
+/* Drops.bot helper page */
+.workspace.drops-mode>.page-heading,.workspace.drops-mode>.network-stats,.workspace.drops-mode>.add-panel,.workspace.drops-mode>.wallet-section,.workspace.drops-mode>#consolidation-panel,.workspace.drops-mode>.history,.workspace.drops-mode>footer{display:none!important}
+.workspace.drops-mode>#drops-page{display:block!important}
+.drops-page{display:none;max-width:1000px;margin:0 auto 30px}
+.drops-intro{color:#a7b2c6;font-size:12px;line-height:1.8}
+.drops-actions{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0}
+.drops-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
+.drops-metrics article{padding:16px;border:1px solid var(--line);border-radius:12px;background:#152033}
+.drops-metrics small{display:block;color:#8997ad;font:10px "DM Mono"}
+.drops-metrics strong{display:block;font-size:24px;margin-top:8px}
+.drops-chain{border:1px solid var(--line);border-radius:12px;background:#101827;margin:12px 0;overflow:hidden}
+.drops-chain-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:#ffffff07;border-bottom:1px solid #ffffff12;font-size:12px}
+.drops-wallet-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid #ffffff0d}
+.drops-wallet-row:last-child{border-bottom:0}
+.drops-wallet-row code{font:10px/1.6 "DM Mono";overflow-wrap:anywhere;color:#dce7fa}
+.drops-wallet-row label{display:flex;align-items:center;gap:6px;white-space:nowrap;color:#aab5c9;font-size:10px}
+.drops-wallet-row input{width:14px;height:14px;accent-color:#55e6d0}
+#drops-addresses{width:100%;min-height:150px;background:#0b1220;color:var(--text);border:1px solid #2b3951;border-radius:10px;padding:12px;font:11px/1.7 "DM Mono"}
+.drops-note{padding:12px;border:1px solid #d8a34a44;background:#d8a34a0c;border-radius:10px;color:#d8bd8a;font-size:10px;line-height:1.7}
+@media(max-width:650px){.drops-wallet-row{align-items:flex-start;flex-direction:column}.drops-chain-head{align-items:flex-start}.drops-actions>*{flex:1}.drops-metrics{gap:8px}}
