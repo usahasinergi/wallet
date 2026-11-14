@@ -57,8 +57,10 @@
     render();
   };
   document.addEventListener("DOMContentLoaded", () => {
-    $d("network-menu")?.addEventListener("click", e => { if (e.target.closest("[data-drops-open]")) openPage(); });
-    $d("network-menu")?.addEventListener("click", () => document.querySelector(".workspace")?.classList.remove("drops-mode"));
+    $d("network-menu")?.addEventListener("click", e => {
+      if (e.target.closest("[data-drops-open]")) { openPage(); return; }
+      if (e.target.closest("[data-chain]")) document.querySelector(".workspace")?.classList.remove("drops-mode");
+    });
     $d("add-wallet-nav")?.addEventListener("click", () => document.querySelector(".workspace")?.classList.remove("drops-mode"));
     $d("drops-copy-all")?.addEventListener("click", () => {
       const rows = uniqueWallets();
