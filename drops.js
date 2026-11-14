@@ -11,8 +11,11 @@
     if (!Array.isArray(wallets)) return [];
     const seen = new Set();
     return wallets.filter(w => {
-      const key = String(w.address || "").trim().toLowerCase();
-      if (!key || seen.has(key)) return false;
+      // Keep one entry per network + address. The same EVM address can
+      // legitimately exist on Ethereum, BNB Chain, Polygon, Arbitrum and Base.
+      const address = String(w.address || "").trim().toLowerCase();
+      const key = String(w.chain || "") + "|" + address;
+      if (!address || seen.has(key)) return false;
       seen.add(key);
       return true;
     });
@@ -32,7 +35,8 @@
     if (!root) return;
     const rows = uniqueWallets();
     const checked = readChecked();
-    $d("drops-total").textContent = rows.length.toLocaleString("id-ID");
+    const uniqueAddressCount = new Set(rows.map(w => String(w.address || "").trim().toLowerCase()).filter(Boolean)).size;
+    $d("drops-total").textContent = uniqueAddressCount.toLocaleString("id-ID");
     $d("drops-checked").textContent = rows.filter(w => checked.has(String(w.id))).length.toLocaleString("id-ID");
     $d("drops-addresses").value = rows.map(w => w.address).join("\n");
     if (!rows.length) {
