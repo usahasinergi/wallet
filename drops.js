@@ -1,7 +1,7 @@
 /* Drops.bot manual checker — uses public wallet addresses only. */
 (() => {
   const $d = (id) => document.getElementById(id);
-  const stateKey = () => "walletscope:drops:checked:" + (window.walletScopeUserId || "guest");
+  const stateKey = () => "walletscope:drops:checked:" + (window.walletScopeUserId || (typeof user !== "undefined" && user?.id) || "guest");
   const readChecked = () => {
     try { return new Set(JSON.parse(localStorage.getItem(stateKey()) || "[]")); }
     catch { return new Set(); }
@@ -83,13 +83,13 @@
     });
     $d("add-wallet-nav")?.addEventListener("click", () => document.querySelector(".workspace")?.classList.remove("drops-mode"));
     $d("drops-copy-all")?.addEventListener("click", () => {
-      const rows = uniqueWallets();
-      copy(rows.map(w => w.address).join("\n"), rows.length + " alamat jaringan berhasil disalin.");
+      const rows = uniqueAddresses(uniqueWallets());
+      copy(rows.map(w => w.address).join("\n"), rows.length + " alamat unik berhasil disalin.");
     });
     $d("drops-copy-pending")?.addEventListener("click", () => {
       const checked = readChecked();
-      const rows = uniqueWallets().filter(w => !checked.has(String(w.id)));
-      copy(rows.map(w => w.address).join("\n"), rows.length + " alamat yang belum diperiksa berhasil disalin.");
+      const rows = uniqueAddresses(uniqueWallets()).filter(w => !checked.has(addressKey(w)) && !checked.has(String(w.id)));
+      copy(rows.map(w => w.address).join("\n"), rows.length + " alamat unik yang belum diperiksa berhasil disalin.");
     });
     $d("drops-search")?.addEventListener("input", render);
     $d("drops-open-site")?.addEventListener("click", () => window.open("https://www.drops.bot/", "_blank", "noopener,noreferrer"));
